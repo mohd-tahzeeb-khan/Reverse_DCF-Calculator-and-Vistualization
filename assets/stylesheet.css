@@ -1,0 +1,58 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wdth,wght@0,75..100,300..800;1,75..100,300..800&display=swap')
+/* homepage_style.css */
+
+*{
+    margin: 0px;
+    padding: 0px;
+}
+body{
+    margin: 0;
+    padding: 0;
+}
+#Navbar{
+    background: #343a40;
+    color: #ffffff;
+    height: 6rem;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+.Heading-text{
+    margin-left: 7.6rem;
+    text-transform: uppercase;
+    
+}
+.Heading-text H3{
+    font-family: "Open Sans", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  font-variation-settings:
+    "wdth" 100;
+      
+}
+.dropdownoption{
+    color: #000;
+    width: 150px;
+    text-transform: uppercase;
+    margin-left: 40px;
+}
+
+.Select-multi-value-wrapper{
+    background-color: #343a40;
+    border-color:#343a40;
+}
+.Select-arrow-zone{
+    background-color: #343a40;
+}
+#textline h4{
+    color: #595959;
+    font-family: "Open Sans", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 300;
+  font-style: normal;
+  font-variation-settings:
+    "wdth" 100;
+    font-size: 1rem;
+    white-space: 1px;
+}
