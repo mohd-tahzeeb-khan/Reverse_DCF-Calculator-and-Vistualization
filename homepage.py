@@ -34,11 +34,11 @@ def update_placeholder(value):
     return "PAGES"
 
 @app.callback(
-        Output('Stock_data', 'children'),
+        [Output('Stock_symbol', 'children'),Output('PE', 'children'),Output('FY23PE', 'children'),Output('ptRoCE', 'children')],
         Input('dropdownoption', 'value')
 )
 def data(data):
-    return 'This is tahzeeb"s logic'
+    return 'This is tahzeeb"s logic','3534', '103.5', '96.0%'
 
 @app.callback(
     Output('textline', 'children'),
