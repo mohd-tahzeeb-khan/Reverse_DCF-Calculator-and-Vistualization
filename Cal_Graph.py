@@ -1,6 +1,8 @@
 import dash
-from dash import Dash, html,dcc
+from dash import Dash, html,dcc, dash_table
 from dash.dependencies import Output, Input
+import pandas as pd
+from collections import OrderedDict
 #<---------- all Dependecies ------------------>
 
 
@@ -24,6 +26,27 @@ input_slider=html.Div([
     html.P(["Terminal growth rate: %"]),
     dcc.Slider(0, 8, 1, value=20, id="tgr"), 
 ])
+
+
+app = Dash(__name__)
+
+data = OrderedDict(
+    [
+        (["10 YRS", "5 YRS", "3 YRS", "TTM"], ),
+        ("Sales Growth", [8,11,13,13]),
+        ("Profit Growth", [10, 13, 13, 26])
+    ]
+)
+
+df = pd.DataFrame(
+    OrderedDict([(name) for (name) in data.items()])
+)
+
+table = dash_table.DataTable(
+    data=df.to_dict('records'),
+    columns=[{'id': c, 'name': c} for c in df.columns],
+    page_size=2
+)
 calculator=html.Div([
     html.Div([
         html.H1("VALUING CONSISTENT COMPOUNDERS")
@@ -37,6 +60,8 @@ calculator=html.Div([
         'margin-bottom':'0'
     }),
     html.Div([inputs]),
-    html.Div([input_slider])
+    html.Div([input_slider]),
+    html.Div(id="Stock_data"),
+    html.Div([table])
 
 ])
