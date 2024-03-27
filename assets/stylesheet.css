@@ -56,3 +56,13 @@ body{
     font-size: 1rem;
     white-space: 1px;
 }
+#graphs{
+    width: 90%;
+    display: flex;
+    align-items:stretch;
+    align-content: space-between;
+}
+
+.cal_data, .scrap_data{
+    display: flex;
+}
