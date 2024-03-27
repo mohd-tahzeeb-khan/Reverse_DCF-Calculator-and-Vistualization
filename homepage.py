@@ -33,6 +33,12 @@ app.layout = html.Div([navigationbar, textline])
 def update_placeholder(value):
     return "PAGES"
 
+@app.callback(
+        Output('Stock_data', 'children'),
+        Input('dropdownoption', 'value')
+)
+def data(data):
+    return 'This is tahzeeb"s logic'
 
 @app.callback(
     Output('textline', 'children'),
