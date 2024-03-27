@@ -3,6 +3,7 @@ from dash import Dash, html,dcc, dash_table
 from dash.dependencies import Output, Input
 import pandas as pd
 from collections import OrderedDict
+import plotly.express as px
 #<---------- all Dependecies ------------------>
 
 
@@ -26,27 +27,15 @@ input_slider=html.Div([
     html.P(["Terminal growth rate: %"]),
     dcc.Slider(0, 8, 1, value=20, id="tgr"), 
 ])
-
-
+data = [
+    {'label': '10YRS', 'value': 100},
+    {'label': '5YRS', 'value': 200},
+    {'label': '3YRS', 'value': 300},
+    {'label': 'TTM', 'value': 400}
+]
+figuare=px.bar(data, x='value', y="label",labels=dict(x="time", y="perioids"), orientation='h')
 app = Dash(__name__)
 
-data = OrderedDict(
-    [
-        (["10 YRS", "5 YRS", "3 YRS", "TTM"], ),
-        ("Sales Growth", [8,11,13,13]),
-        ("Profit Growth", [10, 13, 13, 26])
-    ]
-)
-
-df = pd.DataFrame(
-    OrderedDict([(name) for (name) in data.items()])
-)
-
-table = dash_table.DataTable(
-    data=df.to_dict('records'),
-    columns=[{'id': c, 'name': c} for c in df.columns],
-    page_size=2
-)
 calculator=html.Div([
     html.Div([
         html.H1("VALUING CONSISTENT COMPOUNDERS")
@@ -61,7 +50,22 @@ calculator=html.Div([
     }),
     html.Div([inputs]),
     html.Div([input_slider]),
-    html.Div(id="Stock_data"),
-    html.Div([table])
+    html.Div([
+        html.Div(["Stock Symbol:", html.Span(id='Stock_symbol', className='Stock_symbol', children=[]) ]),
+              html.Div(["Current PE:", html.Span(id='PE', className='PE', children=[])]),
+              html.Div(["FY23PE:", html.Span(id='FY23PE', className='FY23PE', children=[])]),
+              html.Div(["5-yr median pre-tax RoCE:", html.Span(id='ptRoCE', className='ptRoCE', children=[])])
+              ], className="scrap_data"),
+    html.Div([dcc.Graph(
+        figure=figuare
+    ),dcc.Graph(
+        figure=figuare
+    ) ], id="graphs"),
+     html.Div([
+        html.Div(["Play with inputs to see changes in intrinsic PE and overvaluation:"]),
+              html.Div(["The calculated intrinsic PE is:", html.Span(id='CIPE', className='CIPE', children=[])]),
+              html.Div(["Degree of overvaluation:", html.Span(id='DO', className='DO', children=[])]),
+              ], className="cal_data"),
+    
 
 ])
