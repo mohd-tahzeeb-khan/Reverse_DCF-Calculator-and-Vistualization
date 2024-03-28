@@ -4,7 +4,17 @@ from dash.dependencies import Output, Input
 import pandas as pd
 from collections import OrderedDict
 import plotly.express as px
+import requests
+from bs4 import BeautifulSoup
 #<---------- all Dependecies ------------------>
+
+#<----------------- Web Scraping ---------------->
+def Scrapper():
+    url='https://www.screener.in/company/NESTLEIND/'
+    r=requests.get(url)
+    soup=BeautifulSoup(r.text, 'html.parser')
+    PE=soup.find_all("span","value", "number")[3]
+    PE=PE.get_text() #PE fo the Stock
 
 
 inputs=dcc.Input(type='text', placeholder='NESTIND', id='Stock_id', style={
@@ -69,3 +79,4 @@ calculator=html.Div([
     
 
 ])
+Scrapper()
