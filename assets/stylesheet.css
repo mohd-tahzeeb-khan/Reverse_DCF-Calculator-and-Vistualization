@@ -52,6 +52,9 @@ body{
     font-weight: 200;
 
 }
+.Select-clear{
+    display: none;
+}
 .top_heading{
     font-family: "Nunito Sans";
     font-size: 32px;
