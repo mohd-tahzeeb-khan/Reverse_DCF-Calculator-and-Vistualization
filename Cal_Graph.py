@@ -10,15 +10,18 @@ from bs4 import BeautifulSoup
 #<---------- all Dependecies ------------------>
 
 #<----------------- Web Scraping ---------------->
-def Scrapper():
-    url='https://www.screener.in/company/NESTLEIND/'
+def Scrapper(symbol):
+    symbol=symbol.upper()
+    url=f'https://www.screener.in/company/{symbol}/consolidated'
     r=requests.get(url)
     soup=BeautifulSoup(r.text, 'html.parser')
     PE=soup.find_all("span","value", "number")[3]
     PE=PE.get_text() #PE of the Stock
     soup=soup.find_all('section', id="profit-loss")
     Sales_Growth=pd.read_html(soup[0].prettify())[1].iloc[:,-1].str.replace('%', '').values #SALES GROWTH
+    print(Sales_Growth)
     Profit_Growth=pd.read_html(soup[0].prettify())[2].iloc[:,-1].str.replace('%', '').values #PROFIT GROWTH
+    print(Profit_Growth)
     soup=BeautifulSoup(r.text, 'html.parser')
     soup=soup.find_all('ul', id="top-ratios")
     for soup in soup:
@@ -32,9 +35,74 @@ def Scrapper():
     FY23PE=Market_Capint/net_profit # FY23PE
     results = soup.findAll("section",attrs={"id":"ratios"})
     roce = pd.read_html(results[0].table.prettify())[0].iloc[-1].dropna().iloc[-6:-1].str.replace("%","").astype("float32").values
-    roce_median = pn.median(roce)
+    ROCE= pn.median(roce)
+    
+    return PE, FY23PE, ROCE, Sales_Growth, Profit_Growth
 
-inputs=dcc.Input(type='text', placeholder='NESTIND', id='Stock_id', style={
+
+def dcf(coc,roce,gdhgp,tgr,fp,hgp):
+    tax_rate = 0.25
+    coc = coc/100
+    roce = roce/100
+    roce = roce * (1-tax_rate)
+    gdhgp = gdhgp/100
+    tgr = tgr/100
+    rr1 = gdhgp/roce
+    rr2 = tgr/roce
+    cap_emp = 100
+    prev_cap_emp = 100
+    egr = 0
+    nopat = 0
+    prev_nopat = 0
+    investment = 0
+    fcf = 0
+    disc_factor = 0
+    disc_fcf = 0
+    disc_fcf_li = []
+    init_nopat = 0
+    for i in range(hgp+1):
+        if(i>0):
+            egr = (nopat/prev_nopat) - 1
+            prev_nopat = nopat
+        
+        nopat = cap_emp*roce
+        if(i==0):
+            init_nopat = nopat
+            prev_nopat = nopat
+        prev_cap_emp = cap_emp
+        investment = nopat * rr1
+        cap_emp = cap_emp + investment
+        fcf = nopat - investment
+        disc_factor = (1/(1+coc))**i
+        disc_fcf = fcf * disc_factor
+        disc_fcf_li.append(disc_fcf)
+    next_egr = 0
+    for i in range(hgp+1,hgp+fp+1):
+        egr = egr-((gdhgp-tgr)/fp)
+        nopat = cap_emp*roce
+
+        investment = (egr/roce)*nopat
+        cap_emp = cap_emp + investment
+        fcf = nopat - investment
+        disc_factor = (1/(1+coc))**i
+        disc_fcf = fcf * disc_factor
+        disc_fcf_li.append(disc_fcf)
+    terminal_nopat = (nopat*(1+tgr))/(coc-tgr)
+    terminal_investment = terminal_nopat*rr2
+    terminal_fcf = terminal_nopat - terminal_investment
+    terminal_disc_factor = disc_factor
+    terminal_disc_fcf = terminal_fcf * terminal_disc_factor
+    disc_fcf_li.append(terminal_disc_fcf)
+    intrinsic_val = sum(disc_fcf_li)
+    print(intrinsic_val)
+    calc_iPE = intrinsic_val/init_nopat
+    return calc_iPE
+
+
+#----------------------------------------------------------------------------------------------------------------------------------
+
+
+inputs=dcc.Input(type='text', value='NESTIND', id='Stock_id', style={
     #'height':'30px', 
     'border-color':'#000',
     'font-size':'20px', 
@@ -55,45 +123,55 @@ input_slider=html.Div([
     dcc.Slider(0, 8, 1, value=20, id="tgr"), 
 ])
 data = [
-    {'label': '10YRS', 'value': 100},
-    {'label': '5YRS', 'value': 200},
-    {'label': '3YRS', 'value': 300},
-    {'label': 'TTM', 'value': 400}
+    {'Sales Growth (%)': 100, 'Time Period':   '10YRS'},
+    {'Sales Growth (%)': 200, ' Time Period':  '5YRS' },
+    {'Sales Growth (%)': 350, ' Time Period':  '3YRS' },
+    {'Sales Growth (%)': 400, '  Time Period': 'TTM'  }
 ]
-figuare=px.bar(data, x='value', y="label",labels=dict(x="time", y="perioids"), orientation='h')
+datar = [
+    {'Profit Growth (%)': 100, 'Time Period':   '10YRS'},
+    {'Profit Growth (%)': 200,  'Time Period':  '5YRS' },
+    {'Profit Growth (%)': 350,  'Time Period':  '3YRS' },
+    {'Profit Growth (%)': 400,   'Time Period': 'TTM'  }
+]
+figure_left=px.bar(data, x='Sales Growth (%)', y="Time Period",labels=dict(x="Time Period", y="Sales Growth (%)"), orientation='h')
+figure_right=px.bar(datar, x='Profit Growth (%)', y="Time Period",labels=dict(x="Time Period", y="Sales Growth (%)"), orientation='h')
+
+
+table=dash_table.DataTable(
+        id='table_data',
+        columns=[],
+        data=[]
+    )
 app = Dash(__name__)
 
 calculator=html.Div([
     html.Div([
-        html.H1("VALUING CONSISTENT COMPOUNDERS")
+        html.H1("VALUING CONSISTENT COMPOUNDERS", className="top_heading")
     ]),
-    html.H4('Hi there'),
-    html.H4('This page will help you calculate intrinsic PE of consistent compounders through growth-RoCE DCF model.'),
-    html.H4('We then compare this with current PE of the stock to calculate degree of overvaluation.'),
-    html.H3("NSE/BSE symbol", style={
-        'color':'#000',
-        'padding-bottom':'0px',
-        'margin-bottom':'0'
-    }),
+    html.H4('Hi there!', className="subhead"),
+    html.P('This page will help you calculate intrinsic PE of consistent compounders through growth-RoCE DCF model.', className="subhead"),
+    html.P('We then compare this with current PE of the stock to calculate degree of overvaluation.', className="subhead"),
+    html.P("NSE/BSE symbol"),
     html.Div([inputs]),
     html.Div([input_slider]),
     html.Div([
-        html.Div(["Stock Symbol:", html.Span(id='Stock_symbol', className='Stock_symbol', children=[]) ]),
-              html.Div(["Current PE:", html.Span(id='PE', className='PE', children=[])]),
-              html.Div(["FY23PE:", html.Span(id='FY23PE', className='FY23PE', children=[])]),
-              html.Div(["5-yr median pre-tax RoCE:", html.Span(id='ptRoCE', className='ptRoCE', children=[])])
+        html.P(["Stock Symbol:", html.Span(id='Stock_symbol', className='Stock_symbol', children=[]) ]),
+              html.P(["Current PE:", html.Span(id='PE', className='PE', children=[])]),
+              html.P(["FY23PE:", html.Span(id='FY23PE', className='FY23PE', children=[])]),
+              html.P(["5-yr median pre-tax RoCE:", html.Span(id='ptRoCE', className='ptRoCE', children=[])])
               ], className="scrap_data"),
+              html.Div([table]),
     html.Div([dcc.Graph(
-        figure=figuare
+        figure=figure_left, id='left-bar'
     ),dcc.Graph(
-        figure=figuare
+        figure=figure_right, id='right-bar'
     ) ], id="graphs"),
      html.Div([
-        html.Div(["Play with inputs to see changes in intrinsic PE and overvaluation:"]),
-              html.Div(["The calculated intrinsic PE is:", html.Span(id='CIPE', className='CIPE', children=[])]),
-              html.Div(["Degree of overvaluation:", html.Span(id='DO', className='DO', children=[])]),
+        html.P(["Play with inputs to see changes in intrinsic PE and overvaluation:"]),
+              html.P(["The calculated intrinsic PE is:", html.Span(id='CIPE', className='CIPE', children=[])]),
+              html.P(["Degree of overvaluation:", html.Span(id='DO', className='DO', children=[])]),
               ], className="cal_data"),
     
 
 ])
-Scrapper()
