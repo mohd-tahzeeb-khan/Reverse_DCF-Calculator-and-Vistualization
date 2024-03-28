@@ -14,7 +14,10 @@ def Scrapper():
     r=requests.get(url)
     soup=BeautifulSoup(r.text, 'html.parser')
     PE=soup.find_all("span","value", "number")[3]
-    PE=PE.get_text() #PE fo the Stock
+    PE=PE.get_text() #PE of the Stock
+    soup=soup.find_all('section', id="profit-loss")
+    Sales_Growth=pd.read_html(soup[0].prettify())[1].iloc[:,-1].str.replace('%', '').values #SALES GROWTH
+    Profit_Growth=pd.read_html(soup[0].prettify())[2].iloc[:,-1].str.replace('%', '').values #PROFIT GROWTH
 
 
 inputs=dcc.Input(type='text', placeholder='NESTIND', id='Stock_id', style={
