@@ -2,6 +2,7 @@ import dash
 from dash import Dash, html,dcc, dash_table
 from dash.dependencies import Output, Input
 import pandas as pd
+import numpy as pn
 from collections import OrderedDict
 import plotly.express as px
 import requests
@@ -29,6 +30,9 @@ def Scrapper():
     net_profit = float(df[0].iloc[10,-2])
     Market_Capint=float(Market_Cap.replace(',', ''))
     FY23PE=Market_Capint/net_profit # FY23PE
+    results = soup.findAll("section",attrs={"id":"ratios"})
+    roce = pd.read_html(results[0].table.prettify())[0].iloc[-1].dropna().iloc[-6:-1].str.replace("%","").astype("float32").values
+    roce_median = pn.median(roce)
 
 inputs=dcc.Input(type='text', placeholder='NESTIND', id='Stock_id', style={
     #'height':'30px', 
