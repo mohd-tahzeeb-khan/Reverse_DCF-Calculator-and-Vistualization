@@ -4,6 +4,7 @@ from dash.dependencies import Output, Input
 import pandas as pd
 import plotly.express as px
 from Cal_Graph import calculator, Scrapper, dcf
+from app import server as application
 app = dash.Dash(__name__)
 
 global navigationbar
@@ -93,5 +94,6 @@ def icalculator(inputcoc, inputreco, inputgdhgp, inputhgp, inputfd, inputtgr, pe
     do=str(do)
     do=do + " % "
     return round(b,2),do
+
 if __name__ == '__main__':
-    app.run(debug=False)
+    application.run()
