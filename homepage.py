@@ -6,6 +6,7 @@ import plotly.express as px
 from Cal_Graph import calculator, Scrapper, dcf
 from app import server as application
 app = dash.Dash(__name__)
+server=app.server
 
 global navigationbar
 dropdown=dcc.Dropdown(options=[{
