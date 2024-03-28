@@ -4,38 +4,43 @@ from dash.dependencies import Output, Input
 import pandas as pd
 import plotly.express as px
 from Cal_Graph import calculator, Scrapper, dcf
-from app import server as application
 app = dash.Dash(__name__)
 server=app.server
 
 global navigationbar
 dropdown=dcc.Dropdown(options=[{
-    "label":dcc.Link(children="Home", href="/"),
+    "label":dcc.Link(children="Home", href="/HOME", style={"color":"#fff", "textDecoration":"none"}),
     "value":"HOME"
 
 }, {
-    "label":dcc.Link(children="DCF Valuation", href="/DCF"),
-    "value":"DCF"
+    "label":dcc.Link(children="DCF Valuation", href="/DCF",style={"color":"#fff", "textDecoration":"none"},),
+    "value":"DCF",
 
-},],placeholder="PAGES",
+}, ],placeholder="PAGES",value="HOME",clearable=False,
 id="dropdownoption", className="dropdownoption")
 
-textline=html.Div([
-    html.H4("This site provides interactive tools to valuate and analyze stocks through Reverse DCF model. Check the navigation bar for more.")
-], id="textline")
+main=html.Div(children=[], id="main")
 
 navigationbar=html.Div([
     html.Div([
         html.H3("Reverse DCF")], className="Heading-text"), 
         html.Div([dropdown],id="attachdropdown")], id="Navbar",)
+textline=html.Div([
+    html.H4("This site provides interactive tools to valuate and analyze stocks through Reverse DCF model. Check the navigation bar for more.")
+], id="textline")
 
-app.layout = html.Div([navigationbar, textline])
+app.layout = html.Div([navigationbar, main])
 
 @app.callback(
-    Output('dropdownoption', 'placeholder'),
+    [Output('dropdownoption', 'placeholder'), Output('main', 'children'),],
     Input('dropdownoption', 'value'))
-def update_placeholder(value):
-    return "PAGES"
+def update_placeholder(page):
+    print(page)
+    if page=='HOME':
+        return "PAGES", textline,
+    else:
+        return "PAGES",calculator,
+
 
 @app.callback(
         [Output('Stock_symbol', 'children'),Output('PE', 'children'),Output('FY23PE', 'children'),Output('ptRoCE', 'children'),Output('table_data', 'columns'), Output('table_data', 'data'), Output('left-bar', 'figure'), Output('right-bar', 'figure')],
@@ -61,18 +66,6 @@ def data(data, symbol):
     updated=px.bar(datagraph_left, x='Sales Growth (%)', y='Time Period', orientation='h', labels=dict(x="TimePeriod", y="Sales Growth (%)"))
     updated_right=px.bar(datagraph_right, x='Profit Growth (%)', y='Time Period', orientation='h', labels=dict(x="Time Period", y="Profit Growth (%)"))
     return symbol.upper(),a[0], round(a[1],2), a[2],coloum, data, updated, updated_right
-
-
-@app.callback(
-    Output('textline', 'children'),
-    Input('dropdownoption', 'value')
-)
-def render_content(page):
-    print(page)
-    if page=='HOME':
-        return textline
-    else:
-        return calculator
 @app.callback(
     [Output('CIPE', 'children'),Output('DO', 'children')],
     [Input('coc', 'value'),Input('ReCO', 'value'),Input('gdhgp', 'value'),Input('hgp', 'value'),Input('fd', 'value'),Input('tgr', 'value'), Input('PE', 'children'),Input('FY23PE', 'children'),Input('ptRoCE', 'children')])
@@ -97,4 +90,4 @@ def icalculator(inputcoc, inputreco, inputgdhgp, inputhgp, inputfd, inputtgr, pe
     return round(b,2),do
 
 if __name__ == '__main__':
-    application.run()
+   app.run(debug=False)
