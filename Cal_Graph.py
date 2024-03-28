@@ -18,7 +18,10 @@ def Scrapper():
     soup=soup.find_all('section', id="profit-loss")
     Sales_Growth=pd.read_html(soup[0].prettify())[1].iloc[:,-1].str.replace('%', '').values #SALES GROWTH
     Profit_Growth=pd.read_html(soup[0].prettify())[2].iloc[:,-1].str.replace('%', '').values #PROFIT GROWTH
-
+    soup=soup.find_all('ul', id="top-ratios")
+    for soup in soup:
+        no=soup.find_all('span', class_="number")[0]
+        Market_Cap=no.get_text()
 
 inputs=dcc.Input(type='text', placeholder='NESTIND', id='Stock_id', style={
     #'height':'30px', 
