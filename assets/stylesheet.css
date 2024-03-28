@@ -1,5 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wdth,wght@0,75..100,300..800;1,75..100,300..800&display=swap')
-/* homepage_style.css */
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&family=Open+Sans:ital@0;1&display=swap')/* homepage_style.css */
 
 *{
     margin: 0px;
@@ -45,6 +44,22 @@ body{
 .Select-arrow-zone{
     background-color: #343a40;
 }
+.subhead{
+    font-family:"Nunito Sans";
+    font-size: 16px;
+    line-height: 24px;
+    color: #55595c;
+    font-weight: 200;
+
+}
+.top_heading{
+    font-family: "Nunito Sans";
+    font-size: 32px;
+    line-height: 38.4px;
+    font-weight: 600;
+    font-style: normal;
+    color: #000;
+}
 #textline h4{
     color: #595959;
     font-family: "Open Sans", sans-serif;
@@ -64,5 +79,17 @@ body{
 }
 
 .cal_data, .scrap_data{
-    display: flex;
+    display: grid;
+    
+} 
+.cal_data, .scrap_data p{
+    font-family:"Nunito Sans", sans-serif;
+    font-size: 16px;
+    color: #55595c;
+    letter-spacing: 1px;
+    font-weight: 200;
+    line-height:0px;
+    vertical-align:baseline;
+    letter-spacing:1px;
+    word-spacing:0px;
 }
